@@ -53,15 +53,6 @@ class KTM(object):
 
 
 
-
-# def calculate_r2(y_true, y_pred):
-#     r2 = r2_score(y_true, y_pred)
-#     return r2
-
-# def calculate_rmse(y_true, y_pred):
-#     rmse = np.sqrt(mean_squared_error(y_true, y_pred))
-#     return rmse
-
 def binary_entropy(target, pred):
     loss = target * np.log(np.maximum(1e-10, pred)) + (1.0 - target) * np.log(np.maximum(1e-10, 1.0 - pred))
     return np.average(loss) * -1.0
@@ -77,7 +68,6 @@ def compute_accuracy(all_target, all_pred):
     return metrics.accuracy_score(all_target, all_pred)
 
 def compute_rmse(all_target, all_pred):
-    # 计算均方根误差
     return np.sqrt(np.mean((all_target - all_pred)**2))
 
 def train_one_epoch(net, optimizer, criterion, batch_size, k_data, a_data, e_data, it_data, at_data, al_data, df_data):
@@ -263,16 +253,14 @@ class LPKT(KTM):
                 print("[Epoch %d] auc: %.6f, accuracy: %.6f, rmse: %.6f, r2: %.6f" % (idx, test_auc, test_accuracy, test_rmse, test_r2))
                 #print("[Epoch %d] auc: %.6f, accuracy: %.6f" % (idx, test_auc, test_accuracy))
                 if test_auc > best_test_auc:
-                    #torch.save(self.lpkt_net.state_dict(), "/home/q22301203/original/baseline/EduKTM-main/examples/LPKT/2017params/lpkt3.params")
-                    #torch.save(self.lpkt_net.state_dict(),"/home/q22301203/original/baseline/EduKTM-main/examples/LPKT/params2012/lpkt2.params")
-                    torch.save(self.lpkt_net.state_dict(),"/home/q22301203/original/baseline/EduKTM-main/examples/LPKT/ednetparams/lpkt2.params")
+                    torch.save(self.lpkt_net.state_dict(),"../EduKTM-main/examples/LPKT/ednetparams/lpkt2.params")
                     best_test_auc = test_auc
                     best_test_accuracy = test_accuracy
                     best_test_rmse = test_rmse
                     best_test_r2 = test_r2
                     
-                    print(f"此时的valida auc:{test_auc}")
-                    print(f"目前最好的epoch是{idx}")
+                    print(f"valida auc:{test_auc}")
+                    print(f"The best epoch is {idx}")
                     best_test_auc = test_auc
 
         # return best_train_auc, best_test_auc
