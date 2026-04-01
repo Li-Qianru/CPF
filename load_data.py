@@ -10,15 +10,6 @@ class DATA(object):
         self.X = None
     
 
-    '''
-    data format:
-    length
-    KC sequence
-    answer sequence
-    exercise sequence
-    it sequence
-    at sequence
-    '''
 
     def load_data(self, path):
         f_data = open(path, 'r')
@@ -94,15 +85,7 @@ class DATA(object):
                             at_sequence.append(int(AT[i]))
                             al_sequence.append(int(AL[i]))
                             df_sequence.append(int(DF[i]))
-    #                         if i < len(L):
-    #                             l_sequence.append(int(L[i]))
-    #                         else:
-    # # 处理索引超出范围的情况，例如打印错误消息或执行其他适当的操作
-    #                             #print(f"Index {i} is out of range for list L.")
-    #                             l_sequence.append(0) 
-
-                            #l_sequence.append(int(L[i]))
-                            
+   
 
 
                         # print('instance:-->', len(instance),instance)
@@ -154,10 +137,6 @@ class DATA(object):
             dat = df_data[j]
             df_dataArray[j, :len(dat)] = dat
 
-        # l_dataArray = np.zeros((len(l_data), self.seqlen))
-        # for j in range(len(l_data)):
-        #     dat = l_data[j]
-        #     l_dataArray[j, :len(dat)] = dat
         
         
 
