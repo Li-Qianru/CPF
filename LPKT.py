@@ -18,7 +18,6 @@ from DLST import DLST
 
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-#device = torch.device("cpu")
 
 def etl(*args, **kwargs) -> ...:  # pragma: no cover
     """
@@ -82,14 +81,12 @@ def train_one_epoch(net, optimizer, criterion, batch_size, k_data, a_data, e_dat
     it_data = it_data[shuffled_ind]
     al_data = al_data[shuffled_ind]
     df_data = df_data[shuffled_ind]
-    # l_data = l_data[shuffled_ind]
-
+    
     pred_list = []
     target_list = []
     pred_rmse = []
 
     for idx in tqdm.tqdm(range(n), 'Training'):
-    # for idx in range(n):
         optimizer.zero_grad()
 
         k_one_seq = k_data[idx * batch_size: (idx + 1) * batch_size, :]
@@ -99,7 +96,6 @@ def train_one_epoch(net, optimizer, criterion, batch_size, k_data, a_data, e_dat
         it_one_seq = it_data[idx * batch_size: (idx + 1) * batch_size, :]
         al_one_seq = al_data[idx * batch_size: (idx + 1) * batch_size, :]
         df_one_seq = df_data[idx * batch_size: (idx + 1) * batch_size, :]
-        # l_one_seq = l_data[idx * batch_size: (idx + 1) * batch_size, :]
        
 
         input_k = torch.from_numpy(k_one_seq).long().to(device)
@@ -109,7 +105,6 @@ def train_one_epoch(net, optimizer, criterion, batch_size, k_data, a_data, e_dat
         input_al = torch.from_numpy(al_one_seq).long().to(device)
         input_df = torch.from_numpy(df_one_seq).long().to(device)
         target = torch.from_numpy(a_one_seq).float().to(device)
-        # input_l = torch.from_numpy(l_one_seq).long().to(device)
         
 
         pred = net(input_k, input_e, input_at, target, input_it, input_al, input_df)
@@ -145,9 +140,6 @@ def train_one_epoch(net, optimizer, criterion, batch_size, k_data, a_data, e_dat
     loss = binary_entropy(all_target, all_pred)
     auc = compute_auc(all_target, all_pred)
     accuracy = compute_accuracy(all_target, all_pred)
-    """ r2 = calculate_r2(all_target, all_pred)
-    rmse = calculate_rmse(all_target, all_pred)
- """
     r2 = r2_score(all_target, all_pred_rmse)
     rmse = compute_rmse(all_target,all_pred_rmse)
 
@@ -163,7 +155,6 @@ def test_one_epoch(net, batch_size, k_data, a_data, e_data, it_data, at_data, al
     pred_rmse = []
 
     for idx in tqdm.tqdm(range(n), 'Testing'):
-    # for idx in range(n):
         k_one_seq = k_data[idx * batch_size: (idx + 1) * batch_size, :]
         e_one_seq = e_data[idx * batch_size: (idx + 1) * batch_size, :]
         at_one_seq = at_data[idx * batch_size: (idx + 1) * batch_size, :]
@@ -171,7 +162,6 @@ def test_one_epoch(net, batch_size, k_data, a_data, e_data, it_data, at_data, al
         it_one_seq = it_data[idx * batch_size: (idx + 1) * batch_size, :]
         al_one_seq = al_data[idx * batch_size: (idx + 1) * batch_size, :]
         df_one_seq = df_data[idx * batch_size: (idx + 1) * batch_size, :]
-        # l_one_seq = l_data[idx * batch_size: (idx + 1) * batch_size, :]
        
         input_k = torch.from_numpy(k_one_seq).long().to(device)
         input_e = torch.from_numpy(e_one_seq).long().to(device)
@@ -180,7 +170,6 @@ def test_one_epoch(net, batch_size, k_data, a_data, e_data, it_data, at_data, al
         input_al = torch.from_numpy(al_one_seq).long().to(device)
         input_df = torch.from_numpy(df_one_seq).long().to(device)
         target = torch.from_numpy(a_one_seq).float().to(device)
-        # input_l = torch.from_numpy(l_one_seq).long().to(device)
 
         with torch.no_grad():
             pred = net(input_k, input_e, input_at, target, input_it, input_al, input_df)
@@ -215,18 +204,10 @@ class LPKT(KTM):
         q_matrix = torch.from_numpy(q_matrix).float().to(device)
         p_matrix = torch.from_numpy(p_matrix).float().to(device)
         
-        #self.lpkt_net = LPKTNet(n_at, n_it, n_exercise, n_question, d_a, d_e, d_k, q_matrix, dropout).to(device)
         self.lpkt_net = LPKTNet(n_at, n_it, n_exercise, n_question, d_a, d_e, d_k, d_l, d_f, q_matrix, p_matrix, dropout).to(device)
-        #self.lpkt_net = LMEKT(n_at, n_it, n_exercise, n_question, d_a, d_e, d_k, d_l, d_f, q_matrix, p_matrix, dropout).to(device)
         self.batch_size = batch_size
 
     def train(self, train_data, test_data=None, *, epoch: int, lr=0.002, lr_decay_step=15, lr_decay_rate=0.5) -> ...:
-        # tau = nn.Parameter(torch.tensor([tau], requires_grad=True))
-        # gamma = nn.Parameter(torch.tensor([gamma], requires_grad=True))
-        # a = nn.Parameter(torch.tensor([a], requires_grad=True))
-        # b = nn.Parameter(torch.tensor([b], requires_grad=True))
-        # r = nn.Parameter(torch.tensor([r], requires_grad=True))
-        # parameters_to_update = list(self.lpkt_net.parameters()) + [tau, gamma, a, b, r]
         optimizer = torch.optim.Adam(self.lpkt_net.parameters(), lr=lr, eps=1e-8, betas=(0.1, 0.999), weight_decay=1e-6)
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, lr_decay_step, gamma=lr_decay_rate)
         criterion = nn.BCELoss(reduction='none')
@@ -248,22 +229,19 @@ class LPKT(KTM):
             scheduler.step()
 
             if test_data is not None:
-                #test_loss, test_auc, test_accuracy,_,_ = self.eval(test_data)
                 test_loss, test_auc, test_accuracy ,test_rmse ,test_r2= self.eval(test_data)
                 print("[Epoch %d] auc: %.6f, accuracy: %.6f, rmse: %.6f, r2: %.6f" % (idx, test_auc, test_accuracy, test_rmse, test_r2))
-                #print("[Epoch %d] auc: %.6f, accuracy: %.6f" % (idx, test_auc, test_accuracy))
                 if test_auc > best_test_auc:
-                    torch.save(self.lpkt_net.state_dict(),"../EduKTM-main/examples/LPKT/ednetparams/lpkt2.params")
+                    torch.save(self.lpkt_net.state_dict(), "/home/q22301203/original/baseline/EduKTM-main/examples/LPKT/2017params/lpkt3.params")
                     best_test_auc = test_auc
                     best_test_accuracy = test_accuracy
                     best_test_rmse = test_rmse
                     best_test_r2 = test_r2
                     
                     print(f"valida auc:{test_auc}")
-                    print(f"The best epoch is {idx}")
+                    print(f"The beat epoch is {idx}")
                     best_test_auc = test_auc
 
-        # return best_train_auc, best_test_auc
         return best_train_auc, best_test_auc, best_test_accuracy, best_test_rmse, best_test_r2
 
 
