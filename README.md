@@ -43,6 +43,6 @@ CPF is evaluated on several public educational datasets, including:
 
 ASSISTments
 
-Junyi Academy
+Ednet
 
 Each dataset contains student–exercise interaction logs with timestamps, correctness labels, and concept annotations.
